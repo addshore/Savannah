@@ -218,7 +218,7 @@ class ConversationSerializer(serializers.Serializer):
     channel = ImportedModelRelatedField(model=Channel)
     timestamp = serializers.DateTimeField()
     content = serializers.CharField(allow_null=True)
-    location = serializers.URLField(required=False, allow_null=True)
+    location = serializers.URLField(required=False, allow_null=True, allow_blank=True)
     participants = ImportedModelRelatedField(model=Contact, related_field='member', source_from='channel', many=True, required=False)
     tags = TagsField(required=False)
 
@@ -286,7 +286,7 @@ class ContributionSerializer(serializers.Serializer):
     timestamp = serializers.DateTimeField()
     title = serializers.CharField(allow_null=False)
 
-    location = serializers.URLField(required=False, allow_null=True)
+    location = serializers.URLField(required=False, allow_null=True, allow_blank=True)
     conversation = ImportedModelRelatedField(Conversation, source_from='channel', required=False, allow_null=True)
     tags = TagsField(required=False)
 
