@@ -7,6 +7,7 @@ PY := python manage.py
 help:
 	@echo "Commands:"
 	@echo " make up                    Start the stack (detached)"
+	@echo " make down                  Stop the stack"
 	@echo " make logs                  Tail web logs"
 	@echo " make shell                 Open shell in web container"
 	@echo " make migrate               Run Django migrations"
@@ -18,6 +19,9 @@ help:
 
 up:
 	$(DC) up -d --build
+
+down:
+	$(DC) down
 
 logs:
 	$(DC) logs -f $(SERVICE)
