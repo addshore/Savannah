@@ -14,15 +14,16 @@ from frontendv2.views import SavannahView
 
 GITHUB_SELF_URL = 'https://api.github.com/user'
 GITHUB_USER_URL = 'https://api.github.com/users/%(username)s'
-GITHUB_OWNER_ORGS_URL = 'https://api.github.com/user/orgs'
-GITHUB_MEMBER_ORGS_URL = 'https://api.github.com/users/%(username)s/orgs'
-GITHUB_ISSUES_URL = 'https://api.github.com/repos/%(owner)s/%(repo)s/issues?state=all&since=%(since)s&page=%(page)s'
-GITHUB_REPOS_URL = 'https://api.github.com/orgs/%(owner)s/repos?sort=pushed&direction=desc&page=%(page)s'
+GITHUB_OWNER_ORGS_URL = 'https://api.github.com/user/orgs?per_page=100'
+GITHUB_MEMBER_ORGS_URL = 'https://api.github.com/users/%(username)s/orgs?per_page=100'
+GITHUB_ISSUES_URL = 'https://api.github.com/repos/%(owner)s/%(repo)s/issues?state=all&since=%(since)s&page=%(page)s&per_page=100'
+GITHUB_REPOS_URL = 'https://api.github.com/orgs/%(owner)s/repos?sort=pushed&direction=desc&page=%(page)s&per_page=100'
 GITHUB_TIMESTAMP = '%Y-%m-%dT%H:%M:%SZ'
 
 AUTHORIZATION_BASE_URL = 'https://github.com/login/oauth/authorize'
 TOKEN_URL = 'https://github.com/login/oauth/access_token'
-INSTALLATIONS_URL = 'https://api.github.com/user/installations'
+# Paginate installations too when used
+INSTALLATIONS_URL = 'https://api.github.com/user/installations?per_page=100'
 
 class GithubOrgForm(forms.ModelForm):
     class Meta:
