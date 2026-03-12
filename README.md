@@ -65,3 +65,21 @@ To auto-tag conversations & contributions, run:
 ./env/bin/python manage.py tag_conversations
 ./env/bin/python manage.py tag_contributions
 ```
+
+## Running with Docker
+
+Savannah ships with a Docker configuration that builds the application, runs migrations, and creates (or refreshes) a superuser automatically. The cosmetic UI is served from `http://localhost:8000`.
+
+1. Start (or rebuild) the stack:
+	```
+	docker compose up -d --build
+	```
+
+The Compose stack mounts `.` into `/app` so code changes are reflected immediately and stores SQLite data in the `dbdata` volume mounted at `/data`. The database file path can be overridden via the `SQLITE_DB_PATH` environment variable inside `.env`.
+
+Before launching, edit `.env` to set your desired `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, and `DJANGO_SUPERUSER_PASSWORD`. The entrypoint script will run migrations, ensure the default Site record exists, and create/update the superuser on container startup.
+
+If you need to run additional management commands (e.g., `import` or `tag_*`), prepend them to the service like this:
+```sh
+docker compose run --rm web python manage.py import all
+```

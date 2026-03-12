@@ -7,9 +7,14 @@ import datetime
 import operator
 from functools import reduce
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction import text 
+try:
+    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction.text import TfidfTransformer
+    from sklearn.feature_extraction import text
+except ImportError:
+    CountVectorizer = None
+    TfidfTransformer = None
+    text = None
 
 from django.db.models import Count, Q
 from django.shortcuts import reverse

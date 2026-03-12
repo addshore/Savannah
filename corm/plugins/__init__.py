@@ -19,14 +19,17 @@ URL_MATCHER = re.compile(r"(https?://[0-9a-zA-Z.-]+(:[0-9]+)?(/[^\s|()<>'\"]*)?)
 
 def install_plugins():
     for plugin in settings.CORM_PLUGINS:
-        plugin_module, plugin_name = plugin.rsplit(".", maxsplit=1)
-        module = import_module(plugin_module)
-        plugin_class = getattr(module, plugin_name, None)
-        if plugin_class is not None:
-            print("Loaded plugin: %s" % plugin)
-            ConnectionManager.add_plugin(plugin_module, plugin_class())
-        else:
-            print("Failed to load plugin: %s" % plugin)
+        try:
+            plugin_module, plugin_name = plugin.rsplit(".", maxsplit=1)
+            module = import_module(plugin_module)
+            plugin_class = getattr(module, plugin_name, None)
+            if plugin_class is not None:
+                print("Loaded plugin: %s" % plugin)
+                ConnectionManager.add_plugin(plugin_module, plugin_class())
+            else:
+                print("Failed to load plugin: %s" % plugin)
+        except Exception as e:
+            print("Failed to load plugin %s: %s" % (plugin, e))
 
 class MemberWatchEmail(EmailMessage):
     def __init__(self, watch, convo=None):

@@ -174,10 +174,12 @@ WSGI_APPLICATION = 'savannah.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH', os.path.join(BASE_DIR, 'db.sqlite3'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': SQLITE_DB_PATH,
     }
 }
 
@@ -213,6 +215,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+SITE_ID = int(os.environ.get('SITE_ID', 1))
+
 LOGIN_URL = '/login/'
 
 MESSAGE_TAGS = {
@@ -244,6 +248,15 @@ SLACK_SCOPE = 'channels:history,channels:read,users:read'
 GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
 GITHUB_SCOPE = "read:org,public_repo"
+
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+STRIPE_PRODUCT_ID = os.environ.get('STRIPE_PRODUCT_ID', '')
+STRIPE_TEST_SECRET_KEY = os.environ.get('STRIPE_TEST_SECRET_KEY', STRIPE_SECRET_KEY)
+STRIPE_LIVE_SECRET_KEY = os.environ.get('STRIPE_LIVE_SECRET_KEY', '')
+
+DJSTRIPE_WEBHOOK_SECRET = os.environ.get('DJSTRIPE_WEBHOOK_SECRET', '')
+DJSTRIPE_WEBHOOK_VALIDATION = os.environ.get('DJSTRIPE_WEBHOOK_VALIDATION', 'retrieve_event')
 
 TOTD_EXCLUDE_NS = ['admin']
 

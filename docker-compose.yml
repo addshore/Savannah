@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    container_name: savannah-web
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app:cached
+      - dbdata:/data
+
+volumes:
+  dbdata:
