@@ -37,19 +37,29 @@ class CommunityCreationEmail(EmailMessage):
         self.html_body = "emails/new_community_created.html"
 
 
+def _billing_is_disabled():
+    return not settings.BILLING_ENABLED
+
+
 @login_required
 def signup_community(request):
     community = Community(owner=request.user)
     if request.method == "POST":
         form = NewCommunityForm(request.POST, files=request.FILES, instance=community)
         if form.is_valid():
-            new_community = form.save()
+            new_community = form.save(commit=False)
+            if _billing_is_disabled():
+                new_community.status = Community.DEVELOPMENT
+            new_community.save()
             new_community.bootstrap()
             msg = CommunityCreationEmail(new_community)
             msg.send(settings.ADMINS)
             # Redirect to company creation form
             #messages.success(request, "Welcome to your new Communtiy! Learn what to do next in our <a target=\"_blank\" href=\"http://docs.savannahhq.com/getting-started/\">Getting Started</a> guide.")
             ga.add_event(request, 'community_creation', category='signup')
+            if _billing_is_disabled():
+                messages.success(request, "Community created in free self-hosted mode.")
+                return redirect('dashboard', community_id=new_community.id)
             return redirect('billing:signup_org', community_id=new_community.id)
     else:
         form = NewCommunityForm(instance=community)
@@ -62,6 +72,10 @@ def signup_community(request):
 
 @login_required
 def signup_org(request, community_id):
+    if _billing_is_disabled():
+        messages.info(request, "Billing is disabled in this environment.")
+        return redirect('dashboard', community_id=community_id)
+
     # If community doesn't exist
         # Redirect to community signup form
     try:
@@ -101,6 +115,8 @@ def signup_org(request, community_id):
 
 @login_required
 def signup_subscribe_session(request, community_id,):
+    if _billing_is_disabled():
+        return JsonResponse({'error': 'Billing is disabled in this environment.'}, status=400)
  
     management = get_object_or_404(Management, community_id=community_id)
     community = management.community
@@ -141,6 +157,10 @@ def signup_subscribe_session(request, community_id,):
 
 @login_required
 def signup_subscribe(request, community_id):
+    if _billing_is_disabled():
+        messages.info(request, "Billing is disabled in this environment.")
+        return redirect('dashboard', community_id=community_id)
+
     # If community has a subscription
         # Redirect to Stripe customer portal
 
@@ -272,6 +292,10 @@ def payment_failed(event, **kwargs):
 
 @login_required
 def manage_account(request, community_id):
+    if _billing_is_disabled():
+        messages.info(request, "Billing is disabled in this environment.")
+        return redirect('community_settings', community_id=community_id)
+
     community = get_object_or_404(Community, id=community_id)
     if community.owner != request.user:
         messages.warning(request, "Only the owner of this community can access billing information")
@@ -303,6 +327,10 @@ def manage_account(request, community_id):
 
 @login_required
 def change_plan(request, community_id):
+    if _billing_is_disabled():
+        messages.info(request, "Billing is disabled in this environment.")
+        return redirect('managers', community_id=community_id)
+
     community = get_object_or_404(Community, id=community_id)
     if community.owner != request.user:
         messages.warning(request, "Only the owner of this community can change the subscription information")

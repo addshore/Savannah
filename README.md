@@ -22,6 +22,12 @@ Then install the requirements:
 
 You'll need to set up a `.env` file in the root of the project, see `.env.example` for an example.
 
+For self-hosted or development usage without Stripe, set:
+
+`SAVANNAH_BILLING_ENABLED=false`
+
+When billing is disabled, plan limits and Stripe billing flows are bypassed.
+
 Next you'll need to initialize the database and create an admin account:
 
 ```

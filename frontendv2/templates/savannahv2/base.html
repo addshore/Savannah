@@ -404,7 +404,7 @@
                   Settings
                   <i class="fas fa-cogs fa-fw mr-2 ml-2 text-gray-600"></i>
                 </a>
-                {% if view.community.owner == request.user %}
+                {% if BILLING_ENABLED and view.community.owner == request.user %}
                 <a class="dropdown-item text-right" href="{% url 'billing:manage_account' view.community.id %}">
                   Billing
                   <i class="fas fa-money-check-alt fa-fw mr-2 ml-2 text-gray-600"></i>

@@ -13,6 +13,13 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from django.contrib.messages import constants as messages
 
+
+def _env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return str(value).strip().lower() in ('1', 'true', 't', 'yes', 'y', 'on')
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -29,6 +36,7 @@ ALPHA = False
 BETA = True
 OPEN_BETA = True
 IS_DEMO = False
+BILLING_ENABLED = _env_bool('SAVANNAH_BILLING_ENABLED', True)
 DEMO_POOL = 3
 DEMO_DURATION_HOURS = 24
 DEMO_SIZE = 500

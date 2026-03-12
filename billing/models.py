@@ -28,6 +28,8 @@ class Management(models.Model, ManagementPermissionMixin):
 
     @property 
     def is_billable(self):
+        if not settings.BILLING_ENABLED:
+            return False
         if self.subscription is None:
             return False
         if self.subscription.status == SubscriptionStatus.canceled:
@@ -38,6 +40,8 @@ class Management(models.Model, ManagementPermissionMixin):
 
     @property
     def is_per_seat(self):
+        if not settings.BILLING_ENABLED:
+            return False
         return self.subscription is not None and self.subscription.plan is not None and self.subscription.plan.billing_scheme == 'tiered'
 
     @property
@@ -86,6 +90,9 @@ class Management(models.Model, ManagementPermissionMixin):
     @property
     def metadata(self):
         if not hasattr(self, '_metadata'):
+            if not settings.BILLING_ENABLED:
+                self._metadata = {'name': 'Self-Hosted (Free)'}
+                return self._metadata
             if self.subscription is not None:
                 self._metadata = self.subscription.plan.metadata or {}
                 if self.overrides is not None:
@@ -117,6 +124,8 @@ class Management(models.Model, ManagementPermissionMixin):
             raise Exception("Failed to unsubscribe %s: %s" % (subscription_id, e))
 
     def update(self, **kwargs):
+        if not settings.BILLING_ENABLED:
+            return
         if self.subscription is not None:
             if self.subscription.status in ['canceled', 'incomplete_expired']:
                 return
@@ -129,6 +138,8 @@ class Management(models.Model, ManagementPermissionMixin):
             self.subscription.update(**kwargs)
 
     def can_change_to(self, plan):
+        if not settings.BILLING_ENABLED:
+            return True
         plan_data = plan.metadata
         override_data = self.overrides or {}
 
@@ -166,6 +177,8 @@ class Management(models.Model, ManagementPermissionMixin):
 
     @property
     def name(self):
+        if not settings.BILLING_ENABLED:
+            return "Self-Hosted (Free)"
         if 'name' in self.metadata:
             return self.metadata.get('name')
         elif self.subscription is not None:
@@ -175,26 +188,38 @@ class Management(models.Model, ManagementPermissionMixin):
 
     @property
     def managers(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('managers', 0))
 
     @property
     def sources(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('sources', 0))
 
     @property
     def tags(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('tags', 0))
 
     @property
     def projects(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('projects', 0))
 
     @property
     def import_days(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('import_days', 0))
 
     @property
     def retention_days(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return int(self.metadata.get('retention_days', 0))
 
     @property

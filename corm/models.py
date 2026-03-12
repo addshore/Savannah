@@ -48,14 +48,21 @@ class UserAuthCredentials(models.Model):
 class ManagementPermissionMixin(object):
 
     def upgrade_message(self, request, msg):
+        if not settings.BILLING_ENABLED:
+            messages.info(request, msg)
+            return
         messages.info(request, "%s. <a class=\"btn btn-sm btn-success\" href=\"%s\">Upgrade your plan</a> to add more." % (msg, reverse('billing:upgrade', kwargs={"community_id":self.community.id})))
         
     @property
     def name(self):
+        if not settings.BILLING_ENABLED:
+            return "Self-Hosted (Free)"
         return "Unknown Plan"
 
     @property
     def managers(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 1
 
     def can_add_manager(self):
@@ -66,6 +73,8 @@ class ManagementPermissionMixin(object):
 
     @property
     def sources(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 3
 
     def can_add_source(self):
@@ -76,6 +85,8 @@ class ManagementPermissionMixin(object):
 
     @property
     def tags(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 3
 
     def can_add_tag(self):
@@ -86,6 +97,8 @@ class ManagementPermissionMixin(object):
 
     @property
     def projects(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 3
 
     def can_add_project(self):
@@ -96,6 +109,8 @@ class ManagementPermissionMixin(object):
 
     @property
     def import_days(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 1
 
     def max_import_date(self):
@@ -106,6 +121,8 @@ class ManagementPermissionMixin(object):
 
     @property
     def retention_days(self):
+        if not settings.BILLING_ENABLED:
+            return 0
         return 1
 
     def max_retention_date(self):
@@ -245,6 +262,8 @@ class Community(models.Model):
         try:
             return self._management
         except:
+            if not settings.BILLING_ENABLED or self.status == self.DEVELOPMENT:
+                return DevelopmentManagement(community=self)
             if self.status == self.DEMO:
                 return DemoManagement(community=self)
             else:

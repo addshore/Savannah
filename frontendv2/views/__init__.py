@@ -199,9 +199,15 @@ class SavannahView:
     def _add_sources_message(self):
         if self.request.method == "GET" and self.request.user.is_authenticated:
             if self.community.status == Community.SUSPENDED:
-                messages.warning(self.request, "Updates to this community have been suspended due to a billing problem. Please update your <a href=\"%s\">billing information</a> to resume updates." % reverse('billing:manage_account', kwargs={'community_id':self.community.id}))
+                if settings.BILLING_ENABLED:
+                    messages.warning(self.request, "Updates to this community have been suspended due to a billing problem. Please update your <a href=\"%s\">billing information</a> to resume updates." % reverse('billing:manage_account', kwargs={'community_id':self.community.id}))
+                else:
+                    messages.warning(self.request, "Updates to this community have been suspended.")
             elif self.community.status == Community.DEACTIVE:
-                messages.error(self.request, "This community has been deactivated and will not recieve updates. You may reactive is by <a href=\"%s\">starting a new subscription</a>." % (reverse('billing:signup_subscribe', kwargs={'community_id':self.community.id}),))
+                if settings.BILLING_ENABLED:
+                    messages.error(self.request, "This community has been deactivated and will not recieve updates. You may reactive is by <a href=\"%s\">starting a new subscription</a>." % (reverse('billing:signup_subscribe', kwargs={'community_id':self.community.id}),))
+                else:
+                    messages.error(self.request, "This community has been deactivated and will not recieve updates.")
             elif self.community.status == Community.ARCHIVED:
                 messages.info(self.request, "This community has been archived and will no longer receive updates.")
             elif self.community.source_set.all().count() == 0:
@@ -212,7 +218,10 @@ class SavannahView:
                 if self.community.created <= datetime.datetime.utcnow() - datetime.timedelta(days=1):
                     messages.info(self.request, "You can try demo of Savannah CRM using sample data on <b><a href=\"https://demo.savannahhq.com\" target=\"_blank\">our demo site</a></b>.")
             elif self.community.status == Community.SETUP:
-                messages.success(self.request, "Your community is all set! <a href=\"%s\">Start you subsription now</a> and Savannah will begin importing your data." % reverse('billing:signup_org', kwargs={'community_id':self.community.id}))
+                if settings.BILLING_ENABLED:
+                    messages.success(self.request, "Your community is all set! <a href=\"%s\">Start you subsription now</a> and Savannah will begin importing your data." % reverse('billing:signup_org', kwargs={'community_id':self.community.id}))
+                else:
+                    messages.success(self.request, "Your community is all set! Savannah will begin importing your data.")
                 if self.community.created <= datetime.datetime.utcnow() - datetime.timedelta(days=1):
                     messages.info(self.request, "You can try demo of Savannah CRM using sample data on <a href=\"https://demo.savannahhq.com\" target=\"_blank\">our demo site</a>.")
         
@@ -230,6 +239,7 @@ class SavannahView:
     def context(self):
         return {
             "SITE_ROOT": settings.SITE_ROOT,
+            "BILLING_ENABLED": settings.BILLING_ENABLED,
             "active_community": self.community,
             "active_tab": self.active_tab,
             "view": self,
