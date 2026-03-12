@@ -265,7 +265,10 @@ class SalesforceSetup(SavannahView):
 
         print(view.community.management.metadata)
         if not view.community.management.can_add_sales_source():
-            messages.warning(request, "Your plan does not allow sales integrations. <a class=\"btn btn-sm btn-success\" href=\"%s\">Upgrade your plan</a> to add this source." % reverse('billing:upgrade', kwargs={"community_id":view.community.id}))
+            if settings.BILLING_ENABLED:
+                messages.warning(request, "Your plan does not allow sales integrations. <a class=\"btn btn-sm btn-success\" href=\"%s\">Upgrade your plan</a> to add this source." % reverse('billing:upgrade', kwargs={"community_id":view.community.id}))
+            else:
+                messages.warning(request, "This plan does not allow sales integrations.")
             return redirect('sources', community_id=view.community.id)
         context = view.context
         context.update({

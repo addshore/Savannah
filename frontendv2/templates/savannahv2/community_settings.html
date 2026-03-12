@@ -104,13 +104,13 @@
                   <h6 class="m-0 font-weight-bold text-primary">Subscription</h6>
                   {% if not BILLING_ENABLED %}
                   <span class="badge badge-success">Free Mode</span>
-                  {% elif view.community.status == view.community.DEMO %}
+                  {% elif BILLING_ENABLED and view.community.status == view.community.DEMO %}
                   <a class="btn btn-sm btn-success" href="https://savannahcrm.com/community/new" target="_blank"><i class="fas fa-file-invoice"> </i> Signup Now</a>
-                  {% elif view.community.status == view.community.SETUP or not view.community.management.is_billable %}
+                  {% elif BILLING_ENABLED and (view.community.status == view.community.SETUP or not view.community.management.is_billable) %}
                   <a class="btn btn-sm btn-success" href="{% url 'billing:signup_org' view.community.id %}"><i class="fas fa-file-invoice"> </i> Signup Now</a>
-                  {% elif view.community.status != view.community.ACTIVE %}
+                  {% elif BILLING_ENABLED and view.community.status != view.community.ACTIVE %}
                   <a class="btn btn-sm btn-success" href="{% url 'billing:upgrade' view.community.id %}"><i class="fas fa-file-invoice"> </i> Update Info</a>
-                  {% else %}
+                  {% elif BILLING_ENABLED %}
                   <a class="btn btn-sm btn-primary" href="{% url 'billing:upgrade' view.community.id %}"><i class="fas fa-file-invoice"> </i> Change Plan</a>
                   {% endif %}
                 </div>
@@ -125,9 +125,9 @@
                   {% if view.community.management.subscription.cancel_at_period_end %}
                   <div class="text-muted small">Ends: {{view.community.management.subscription.current_period_end|date}}</div>
                   {% endif %}
-                {% elif view.community.status == view.community.DEMO %}
+                {% elif BILLING_ENABLED and view.community.status == view.community.DEMO %}
                 <p><b>Plan: </b>Demonstration</p>
-                {% else %}
+                {% elif BILLING_ENABLED %}
                 <p><b>Plan: </b>None</p>
                 {% endif %}
 

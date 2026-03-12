@@ -217,14 +217,14 @@ class SavannahView:
                     messages.error(self.request, "We can't import data for <b>%s</b> until you've added add your first data source. You can do that on the <a class=\"btn btn-primary btn-sm\" href=\"%s\"><i class=\"fas fa-database\"></i> Sources</a> page." % (self.community.name, reverse('sources', kwargs={'community_id':self.community.id})))
                 else:
                     messages.info(self.request, "It looks like you haven't added any data sources to <b>%s</b> yet, you can do that on the <a class=\"btn btn-primary btn-sm\" href=\"%s\"><i class=\"fas fa-database\"></i> Sources</a> page." % (self.community.name, reverse('sources', kwargs={'community_id':self.community.id})))
-                if self.community.created <= now - datetime.timedelta(days=1):
+                if self.community.created <= now - datetime.timedelta(days=1) and settings.BILLING_ENABLED:
                     messages.info(self.request, "You can try demo of Savannah CRM using sample data on <b><a href=\"https://demo.savannahhq.com\" target=\"_blank\">our demo site</a></b>.")
             elif self.community.status == Community.SETUP:
                 if settings.BILLING_ENABLED:
                     messages.success(self.request, "Your community is all set! <a href=\"%s\">Start you subsription now</a> and Savannah will begin importing your data." % reverse('billing:signup_org', kwargs={'community_id':self.community.id}))
                 else:
                     messages.success(self.request, "Your community is all set! Savannah will begin importing your data.")
-                if self.community.created <= now - datetime.timedelta(days=1):
+                if self.community.created <= now - datetime.timedelta(days=1) and settings.BILLING_ENABLED:
                     messages.info(self.request, "You can try demo of Savannah CRM using sample data on <a href=\"https://demo.savannahhq.com\" target=\"_blank\">our demo site</a>.")
         
     @property
@@ -630,11 +630,33 @@ class CommunityCreationEmail(EmailMessage):
         self.text_body = "emails/new_community_created.txt"
         self.html_body = "emails/new_community_created.html"
 
+@login_required
 def new_community(request):
-    if settings.IS_DEMO:
+    if settings.IS_DEMO and settings.BILLING_ENABLED:
         return redirect('demo:new')
-    else:
-        return redirect('billing:signup')
+
+    if not settings.BILLING_ENABLED:
+        community = Community(owner=request.user)
+        if request.method == "POST":
+            form = CommunityForm(request.POST, files=request.FILES, instance=community)
+            if form.is_valid():
+                new_community = form.save(commit=False)
+                new_community.status = Community.DEVELOPMENT
+                new_community.save()
+                new_community.bootstrap()
+                msg = CommunityCreationEmail(new_community)
+                msg.send(settings.ADMINS)
+                messages.success(request, "Welcome to your new Community!")
+                return redirect('dashboard', community_id=new_community.id)
+        else:
+            form = CommunityForm(instance=community)
+
+        context = {
+            "form": form,
+        }
+        return render(request, 'savannahv2/community_add.html', context)
+
+    return redirect('billing:signup')
     
 def branding(request):
     context = {

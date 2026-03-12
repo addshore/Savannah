@@ -28,16 +28,12 @@ urlpatterns = [
     path('', include('frontendv2.urls')),
 
     path('inbox/notifications/', include(notifications.urls, namespace='notifications')),
-    path('demo/', include('demo.urls')),
 ] 
 
 if settings.BILLING_ENABLED:
     urlpatterns += [
         path('billing/', include('billing.urls')),
-    ]
-else:
-    urlpatterns += [
-        path('billing/', include('billing.disabled_urls')),
+        path('demo/', include('demo.urls')),
     ]
 
 for module, plugin in ConnectionManager.CONNECTOR_PLUGINS.items():
