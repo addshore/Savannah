@@ -18,6 +18,8 @@ Then install the requirements:
 ./env/bin/pip install -r requirements.txt
 ```
 
+You'll need to set up a `.env` file in the root of the project, see `.env.example` for an example.
+
 Next you'll need to initialize the database and create an admin account:
 
 ```

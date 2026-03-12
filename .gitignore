@@ -3,6 +3,7 @@
 *.sqlite3
 .vscode
 local_settings.py
+.env
 /static/
 /env/
 **/.DS_Store
