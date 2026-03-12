@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404, reverse
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 from django.contrib.messages.constants import DEFAULT_TAGS, WARNING
 from django.utils.safestring import mark_safe
 from jsonfield.fields import JSONField
@@ -1740,7 +1741,7 @@ class UploadedFile(models.Model):
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     uploaded_to = models.FileField()
-    mapping = models.JSONField(default=dict())
+    mapping = models.JSONField(default=dict)
     status = models.PositiveSmallIntegerField(default=UPLOADED, choices=STATUS_CHOICES)
     status_msg = models.CharField(max_length=256, null=True, blank=True)
     import_tag = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True, blank=True, help_text="Tag all Members in this file")
@@ -1831,11 +1832,12 @@ class Opportunity(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='opportunities_created')
     closed_at = models.DateTimeField(null=True, blank=True)
     closed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='opportunities_closed')
-    activities = models.ManyToManyField(Activity, null=True, blank=True, related_name='opportunities')
+    activities = models.ManyToManyField(Activity, blank=True, related_name='opportunities')
 
     @property
     def past_due(self):
-        return self.deadline < datetime.datetime.utcnow()
+        # use timezone-aware now() to avoid comparing naive vs aware datetimes
+        return self.deadline < timezone.now()
 
     @property
     def is_done(self):

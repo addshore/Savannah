@@ -5,6 +5,7 @@ from xml.etree import ElementTree as XMLParser
 from html.parser import HTMLParser
 import io
 import pytz
+from django.utils import timezone
 
 from django.contrib import messages
 from django import forms
@@ -165,8 +166,18 @@ class RssImporter(PluginImporter):
           for item in tree.findall('item'):
             self.import_item(item, channel, source, community)
 
+    def _get_node_text(self, item, tag):
+        node = item.find(tag)
+        if node is None or node.text is None:
+            return None
+        return node.text.strip()
+
     def import_item(self, item, channel, source, community):
-        article_link = item.find('link').text
+        article_link = self._get_node_text(item, 'link')
+        if article_link is None:
+            if self.verbosity:
+                print("Skipping RSS item without link")
+            return
         guid_node = item.find('guid')
         author_node = item.find('{http://purl.org/dc/elements/1.1/}creator')
         if author_node is None:
@@ -177,8 +188,25 @@ class RssImporter(PluginImporter):
         if author_name is None:
             print("No author name for article: %s" % article_link)
             return
-        tstamp = self.strptime(item.find('pubDate').text.strip()).replace(tzinfo=None)
-        article_title = item.find('title').text.strip()
+        # parse timestamp and ensure it's timezone-aware
+        pubdate_node = item.find('pubDate')
+        pubdate_text = self._get_node_text(item, 'pubDate')
+        if pubdate_text is None:
+            if self.verbosity:
+                print("Skipping RSS item without pubDate: %s" % (article_link))
+            return
+        tstamp = self.strptime(pubdate_text)
+        if tstamp.tzinfo is None:
+            # make naive datetimes aware in the current Django timezone
+            tstamp = timezone.make_aware(tstamp, timezone.get_default_timezone())
+        else:
+            # normalize to current Django timezone
+            tstamp = tstamp.astimezone(timezone.get_default_timezone())
+        article_title = self._get_node_text(item, 'title')
+        if article_title is None:
+            if self.verbosity:
+                print("Skipping RSS item without title: %s" % (article_link))
+            return
         if len(article_title) > 198:
             article_title = article_title[:198]
         origin_id = article_link

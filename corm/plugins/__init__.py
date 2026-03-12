@@ -4,6 +4,7 @@ import subprocess
 import requests
 import urllib
 from importlib import import_module
+from django.utils import timezone
 from time import sleep
 from corm.models import Member, MemberWatch, Contact, Conversation, Contribution, Participant, ManagerProfile, Event, EventAttendee, Company, SourceGroup, CompanyDomains, Hyperlink
 from corm.connectors import ConnectionManager
@@ -494,18 +495,18 @@ class PluginImporter:
             first_import = self.first_import
             try:
                 if channel.first_import is None:
-                    channel.first_import = datetime.datetime.utcnow()
+                    channel.first_import = timezone.now()
                     first_import = True
                     channel.save()
 
                 if channel.last_import and not self.full_import:
                     from_date = channel.last_import
                 else:
-                    from_date = datetime.datetime.utcnow() - datetime.timedelta(days=settings.MAX_IMPORT_HISTORY_DAYS)
+                    from_date = timezone.now() - datetime.timedelta(days=settings.MAX_IMPORT_HISTORY_DAYS)
                     # Because we're going a full import, set the last_imported to now to avoid the next run
                     # also trying to do a full import if this one hasn't finished yet.
                     full_import = True
-                    channel.last_import = datetime.datetime.utcnow()
+                    channel.last_import = timezone.now()
                     channel.save()
                 if self.verbosity >= 2:
                     print("From %s since %s" % (channel.name, from_date))
@@ -526,7 +527,7 @@ class PluginImporter:
                     )
                 if channel.oldest_import is None or from_date < channel.oldest_import:
                     channel.oldest_import = from_date
-                channel.last_import = datetime.datetime.utcnow()
+                channel.last_import = timezone.now()
                 channel.import_failed_attempts = 0
                 channel.import_failed_message = None
                 channel.save()
@@ -560,7 +561,7 @@ class PluginImporter:
 
         self.post_import(new_only, channels)
 
-        self.source.last_import = datetime.datetime.utcnow()
+        self.source.last_import = timezone.now()
         if self.source.first_import is None:
             self.source.first_import = self.source.last_import
         if len(failures) > 0:
