@@ -1261,6 +1261,13 @@ class Event(ImportedDataModel):
     def staff(self):
         return Member.objects.filter(event_attendance__event=self, event_attendance__role=EventAttendee.STAFF)
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.end_timestamp and self.start_timestamp and self.end_timestamp < self.start_timestamp:
+            raise ValidationError({
+                'end_timestamp': 'Event end date/time cannot be before the start date/time.'
+            })
+
     def __str__(self):
         return "%s (%s)" % (self.title, self.community)
 
