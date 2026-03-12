@@ -85,3 +85,25 @@ If you need to run additional management commands (e.g., `import` or `tag_*`), p
 ```sh
 docker compose run --rm web python manage.py import all
 ```
+
+Makefile
+--------
+
+This repository includes a `Makefile` with convenient shortcuts for common docker-compose workflows. Examples:
+
+```sh
+# Start the stack (detached)
+make up
+
+# Run the importer (set TYPE to slack|github|discourse|rss|all)
+make import TYPE=all
+
+# Rebuild the web image then run the importer (use if dependencies changed)
+make import-build TYPE=all
+
+# Run a one-off manage.py command
+make manage CMD="migrate"
+
+# Open a shell in the web container
+make shell
+```
