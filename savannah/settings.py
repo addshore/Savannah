@@ -94,7 +94,10 @@ PASSWORD_RESET_EXPIRATION_DAYS = 1
 
 MAX_CHANNEL_IMPORT_FAILURES = 24
 MAX_SOURCE_IMPORT_FAILURES = 48
-MAX_IMPORT_HISTORY_DAYS=180
+# How many days of history to import by default. Can be overridden via
+# environment variable SAVANNAH_MAX_IMPORT_HISTORY_DAYS or MAX_IMPORT_HISTORY_DAYS.
+# Default to ~6 months (180 days).
+MAX_IMPORT_HISTORY_DAYS = int(os.environ.get('SAVANNAH_MAX_IMPORT_HISTORY_DAYS', os.environ.get('MAX_IMPORT_HISTORY_DAYS', '180')))
 
 # Application definition
 
