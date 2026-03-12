@@ -28,9 +28,13 @@ urlpatterns = [
     path('', include('frontendv2.urls')),
 
     path('inbox/notifications/', include(notifications.urls, namespace='notifications')),
-    path('billing/', include('billing.urls')),
     path('demo/', include('demo.urls')),
 ] 
+
+if settings.BILLING_ENABLED:
+    urlpatterns += [
+        path('billing/', include('billing.urls')),
+    ]
 
 for module, plugin in ConnectionManager.CONNECTOR_PLUGINS.items():
     plugin_name = module.rsplit(".", maxsplit=1)[-1]

@@ -124,10 +124,13 @@ INSTALLED_APPS = [
     'frontendv2.apps.FrontendConfig',
     'apiv1.apps.Apiv1Config',
     'demo.apps.DemoConfig',
-
-    'djstripe',
-    'billing.apps.BillingConfig',
 ]
+
+if BILLING_ENABLED:
+    INSTALLED_APPS += [
+        'djstripe',
+        'billing.apps.BillingConfig',
+    ]
 
 CORM_PLUGINS = [
     "corm.plugins.discord.DiscordPlugin",
@@ -251,6 +254,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = './static/'
 MEDIA_ROOT = "./media/"
 MEDIA_URL = "/media/"
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 SLACK_CLIENT_ID = os.environ.get('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = os.environ.get('SLACK_CLIENT_SECRET')
@@ -271,4 +275,7 @@ DJSTRIPE_WEBHOOK_VALIDATION = os.environ.get('DJSTRIPE_WEBHOOK_VALIDATION', 'ret
 
 TOTD_EXCLUDE_NS = ['admin']
 
-DJSTRIPE_WEBHOOK_EVENT_CALLBACK = "billing.callbacks.stripe_event_callback"
+if BILLING_ENABLED:
+    DJSTRIPE_WEBHOOK_EVENT_CALLBACK = "billing.callbacks.stripe_event_callback"
+else:
+    DJSTRIPE_WEBHOOK_EVENT_CALLBACK = None
