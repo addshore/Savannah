@@ -79,6 +79,8 @@ class ManagementPermissionMixin(object):
         return 3
 
     def can_add_source(self):
+        if not settings.BILLING_ENABLED:
+            return True
         if self.sources > 0:
             return self.community.source_set.filter(enabled=True).exclude(connector='corm.plugins.null').count() < self.sources
         else:
